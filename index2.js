@@ -19,6 +19,10 @@ const colors = require("colors");
  *  5. repeat sequence from 3. until either player's pokemon HP is <= 0, game over.
  */
 /**
+ * 
+ ****DEPRECATED****
+ * initial setup:
+ * 
  * Pokemon constructor : create pokemons with
  *  –name
  *  –health
@@ -57,6 +61,8 @@ const colors = require("colors");
  *      - (create skills array for each pokemon) attacks should be added to pokemon's skills array
  */
 
+
+//////MAIN CLASS//////
 class Arena {
   constructor() {
     this.pokemons = [];
@@ -67,6 +73,7 @@ class Arena {
     this.pokemons.push(...pokemonName);
     return this.pokemons;
   }
+  //initial complete list of all pokemons to let player pick 
   displayPokemons() {
     return this.pokemons.map(
       (pokemonName) =>
@@ -78,6 +85,7 @@ class Arena {
         )}`
     );
   }
+  // lets blue player pick their pokemon
   pickPokemonBlue(name) {
     let check = this.pokemons.find(
       (pickedName) =>
@@ -91,6 +99,7 @@ class Arena {
       return `${check.pokemonName} has entered the Arena`;
     }
   }
+  // lets green player pick their pokemon
   pickPokemonGreen(name) {
     let check = this.pokemons.find(
       (pickedName) =>
@@ -104,15 +113,18 @@ class Arena {
       return `${check.pokemonName} has entered the Arena`;
     }
   }
+  // display status of Blue Pokemon
   showStatusBlue() {
     return `${this.bluePokemon.pokemonName} has ${this.bluePokemon.hitPoints} hit points, ${this.bluePokemon.mana} mana points left`;
   }
   // and currently has a damage multiplier of ${this.bluePokemon.level}x`;
+  //////display status of Green Pokemon
   showStatusGreen() {
     return `${this.greenPokemon.pokemonName} has ${this.greenPokemon.hitPoints} hit points, ${this.greenPokemon.mana} mana points left`;
   }
   /*     and currently has a damage multiplier of ${this.greenPokemon.level}x`;
   } */
+  //blue attack sequence
   blueAttackTurn(skill) {
     let check = this.bluePokemon.skills.find(
       (pickedSkill) =>
@@ -127,6 +139,7 @@ class Arena {
       return `${this.greenPokemon.pokemonName} deflected ${this.bluePokemon.pokemonName}'s attack`;
     }
   }
+  //green attack sequence
   greenAttackTurn(skill) {
     let check = this.greenPokemon.skills.find(
       (pickedSkill) =>
@@ -143,6 +156,7 @@ class Arena {
   }
 }
 
+//////POKEMON CONSTRUCTOR//////
 class Pokemon {
   constructor(pokemonName, hitPoints, defense, mana, level) {
     this.pokemonName = pokemonName;
@@ -160,6 +174,7 @@ class Pokemon {
   }
 }
 
+//////SKILL CONSTRUCTOR//////
 class Skill {
   constructor(skillName, damage, manaCost) {
     this.skillName = skillName;
@@ -168,8 +183,7 @@ class Skill {
   }
 }
 
-// pokemons
-
+//////POKEMON CREATION//////
 let pikachu = new Pokemon("Pikachu", 35, 40, 80, 1);
 let bulbasaur = new Pokemon("Bulbasaur", 45, 49, 105, 1);
 let charmandar = new Pokemon("Charmandar", 39, 43, 75, 1);
@@ -178,7 +192,7 @@ let jigglyPuff = new Pokemon("Jigglypuff", 115, 20, 65, 1);
 let bellSprout = new Pokemon("Bellsprout", 50, 35, 200, 1);
 let mewTwo = new Pokemon("Mewtwo", 106, 5, 50, 1);
 
-// skills
+//////SKILL CREATION AND ASSIGNMENT//////
 //pikachu
 let static = new Skill("Static", 50, 30);
 let lightningRod = new Skill("Lightning Rod", 90, 67);
@@ -202,6 +216,7 @@ let torrent = new Skill("Torrent", 45, 23);
 let rainDash = new Skill("Rain Dash", 78, 46);
 squirtle.addSkill(torrent);
 squirtle.addSkill(rainDash);
+
 //jigglypuff
 let cuteCharm = new Skill("Cute Charm", 60, 80);
 let competitive = new Skill("Competitive", 30, 10);
@@ -219,7 +234,7 @@ let unnerve = new Skill("Unnerve", 70, 90);
 mewTwo.addSkill(pressure);
 mewTwo.addSkill(unnerve);
 
-//create Arena
+//////CREATE ARENA//////
 let arena = new Arena();
 arena.addPokemon(
   pikachu,
@@ -231,12 +246,15 @@ arena.addPokemon(
   mewTwo
 );
 
+//////GAME FUNCTIONS//////
 // main fight function, checking attack input functions & global variables
 
+//////GLOBAL VARIABLES//////
 let roundCounter = 0;
 let attackBlue = "";
 let attackGreen = "";
 
+//////CHECK INPUT OF BLUE ATTACK//////
 function attackCheckBlue() {
   let check = arena.bluePokemon.skills.find(
     (pickedSkill) =>
@@ -276,7 +294,7 @@ function attackCheckBlue() {
     console.log(colors.blue(arena.blueAttackTurn(attackBlue)));
   }
 }
-
+//////CHECK INPUT OF GREEN ATTACK//////
 function attackCheckGreen() {
   let check = arena.greenPokemon.skills.find(
     (pickedSkill) =>
@@ -316,6 +334,8 @@ function attackCheckGreen() {
   }
 }
 
+//////MAIN FIGHT FUNCTION//////
+// runs main flow of alternating attack sequences
 function fight() {
   roundCounter += 1;
   console.log(colors.yellow(`Round ${roundCounter} - FIGHT!`));
@@ -355,7 +375,8 @@ function fight() {
   master();
 }
 
-// Master function -- Check health until one pokemon dies - else return to fight()
+//////MASTER FUNCTION//////
+// Check health until one pokemon dies - else return to fight()
 function master() {
   if (arena.bluePokemon.hitPoints <= 0) {
     console.log(
@@ -374,8 +395,7 @@ function master() {
   }
 }
 
-//functions to check pokemon picks
-
+//////CHECK POKEMON PICKS//////
 // blue
 function pokemonCheckBlue() {
   let check = arena.pokemons.find(
@@ -407,7 +427,7 @@ function pokemonCheckGreen() {
   }
 }
 
-// game start sequence
+//////GAME START SEQUENCE//////
 console.log(
   colors.yellow(
     "Players, decide which pokemon you want:",
@@ -444,6 +464,8 @@ console.log(
 );
 fight();
 
+
+//////COMMENTS//////
 /*
 1. re-write into class methods (of arena class) 
     i.   fight() 
@@ -455,4 +477,6 @@ fight();
 4. make pokemon stats more levelled out
 5. improve readability in console (e.g when using "check" command, it should return a well formatted stat display)
 6. fix bug where "Blue Player Wins!" message is displayed twice
+7. randomise starting player
+8. fix wording (e.g attack vs skill)
 */
