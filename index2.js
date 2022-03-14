@@ -1,7 +1,7 @@
-const prompt = require("prompt-sync")({ sigint: true });
-const colors = require("colors");
 
+/////POKEMON (NOT SO) LITE (ANYMORE)/////
 /**
+ * 
  * 1. players pick pokemons
  *    i. picked pokemons to be added to independent arrays
  * 2. blue player always goes first to attack
@@ -61,6 +61,9 @@ const colors = require("colors");
  *      - (create skills array for each pokemon) attacks should be added to pokemon's skills array
  */
 
+
+ const prompt = require("prompt-sync")({ sigint: true });
+const colors = require("colors");
 
 //////MAIN CLASS//////
 class Arena {
