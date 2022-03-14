@@ -2,6 +2,23 @@ const prompt = require("prompt-sync")({ sigint: true });
 const colors = require("colors");
 
 /**
+ * 1. players pick pokemons
+ *    i. picked pokemons to be added to independent arrays
+ * 2. blue player always goes first to attack
+ * 3. attack sequence:
+ *    i. both Pokemon statuses are displayed and attacking player decides what to do:
+ *        a. picks attack & execute
+ *        b. skip attack to increase mana by 30 & skip to 4.
+ *    ii. impact on target:
+ *        a. attack – defense: if leftover attack <= 0, no hit
+ *        b. leftover attack > 0, HP of target – leftover attack
+ *        not implemented ---> c. if leftover HP is less than 40%, increase pokemon to level 2 (double damage in next turn)
+ *    iii. impact on attacker
+ *        a. reduce mana by cost of attack
+ *  4. next players turn
+ *  5. repeat sequence from 3. until either player's pokemon HP is <= 0, game over.
+ */
+/**
  * Pokemon constructor : create pokemons with
  *  –name
  *  –health
@@ -45,9 +62,6 @@ class Arena {
     this.pokemons = [];
     this.bluePokemon = [];
     this.greenPokemon = [];
-    this.roundCounter = 0;
-    this.attackBlue = "";
-    this.attackGreen = "";
   }
   addPokemon(...pokemonName) {
     this.pokemons.push(...pokemonName);
@@ -70,7 +84,7 @@ class Arena {
         pickedName.pokemonName.toLowerCase() === name.toLowerCase()
     );
     if (check === undefined) {
-      return "Whatever that pokemon is, it isn't here and probably doesn't want to fight in the Arena...because really this is animal cruelty";
+      return;
     } else {
       this.bluePokemon = check;
       console.log(this.bluePokemon);
@@ -83,7 +97,7 @@ class Arena {
         pickedName.pokemonName.toLowerCase() === name.toLowerCase()
     );
     if (check === undefined) {
-      return "Whatever that pokemon is, its not ready to fight in the Arena";
+      return;
     } else {
       this.greenPokemon = check;
       console.log(this.greenPokemon);
@@ -91,28 +105,19 @@ class Arena {
     }
   }
   showStatusBlue() {
-    return `${this.bluePokemon.pokemonName} has ${this.bluePokemon.hitPoints} hit points, ${this.bluePokemon.mana} mana points left and currently has a damage multiplier of ${this.bluePokemon.level}x`;
+    return `${this.bluePokemon.pokemonName} has ${this.bluePokemon.hitPoints} hit points, ${this.bluePokemon.mana} mana points left`;
   }
+  // and currently has a damage multiplier of ${this.bluePokemon.level}x`;
   showStatusGreen() {
-    return `${this.greenPokemon.pokemonName} has ${this.greenPokemon.hitPoints} hit points, ${this.greenPokemon.mana} mana points left and currently has a damage multiplier of ${this.greenPokemon.level}x`;
+    return `${this.greenPokemon.pokemonName} has ${this.greenPokemon.hitPoints} hit points, ${this.greenPokemon.mana} mana points left`;
   }
+  /*     and currently has a damage multiplier of ${this.greenPokemon.level}x`;
+  } */
   blueAttackTurn(skill) {
     let check = this.bluePokemon.skills.find(
       (pickedSkill) =>
         pickedSkill.skillName.toLowerCase() === skill.toLowerCase()
     );
-    /* if (skill.toLowerCase() === "skip") {
-      this.bluePokemon.mana = +30;
-      return "increasing mana by 30 & skipping attack";
-    } else if (this.bluePokemon.mana < check.manaCost) { */
-    /* else if (check === undefined) {
-      console.log(
-        `${this.bluePokemon.pokemonName} doesn't know that attack, try again`
-      );
-      return attackBlue;
-    } */
-    /*       return `${this.bluePokemon.pokemonName} doesn't have enough mana to execute that attack, skip or pick another attack`; */
-
     this.bluePokemon.mana -= check.manaCost;
     let damageVsDefense = check.damage - this.greenPokemon.defense;
     if (damageVsDefense > 0) {
@@ -122,22 +127,11 @@ class Arena {
       return `${this.greenPokemon.pokemonName} deflected ${this.bluePokemon.pokemonName}'s attack`;
     }
   }
-
   greenAttackTurn(skill) {
     let check = this.greenPokemon.skills.find(
       (pickedSkill) =>
         pickedSkill.skillName.toLowerCase() === skill.toLowerCase()
     );
-    /* if (skill.toLowerCase() === "skip") {
-      this.greenPokemon.mana += 30;
-      return "increasing mana by 30 & skipping attack";
-    } */
-    /* else if (check === undefined) {
-      return (
-        `${this.greenPokemon.pokemonName} doesn't know that attack, try again` &&
-        attackBlue
-      ); 
-    } */
     this.greenPokemon.mana -= check.manaCost;
     let damageVsDefense = check.damage - this.bluePokemon.defense;
     if (damageVsDefense > 0) {
@@ -146,135 +140,6 @@ class Arena {
     } else {
       return `${this.bluePokemon.pokemonName} deflected ${this.greenPokemon.pokemonName}'s attack`;
     }
-  }
-  checkHealthBlue() {
-    let check = this.pokemons.find(
-      (name) => name.pokemonName === this.bluePokemon.pokemonName
-    );
-    if (this.bluePokemon.pokemonName) {
-    }
-  }
-  attackCheckBlue() {
-    if (arena.attackBlue.toLowerCase() === "skip") {
-      arena.bluePokemon.mana += 30;
-      console.log(`skipping attack & increasing mana by 30`.blue);
-    } else if (
-      !(
-        arena.bluePokemon.skills[0].skillName.toLowerCase() ===
-          arena.attackBlue.toLowerCase() ||
-        arena.bluePokemon.skills[1].skillName.toLowerCase() ===
-          arena.attackBlue.toLowerCase()
-      )
-    ) {
-      arena.attackBlue = prompt(
-        `${this.bluePokemon.PokemonName} doesn't know this attack. \n Blue Player: Pick your attack: `
-          .blue
-      );
-      attackCheckBlue();
-    } else {
-      console.log(colors.blue(arena.blueAttackTurn(arena.attackBlue)));
-    }
-  }
-  fight() {
-    this.roundCounter += 1;
-    console.log(colors.yellow(`Round ${this.roundCounter}`));
-    console.log(
-      "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-        .red
-    );
-    this.attackBlue = prompt("Blue Player: Pick your attack: ".blue);
-    this.attackCheckBlue();
-    console.log(
-      "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-        .red
-    );
-    if (this.greenPokemon.hitPoints <= 0 || this.bluePokemon.hitPoints <= 0) {
-      this.master();
-    } else {
-      this.attackGreen = prompt("Green Player: Pick your attack: ".green);
-      function attackCheckGreen() {
-        if (this.attackGreen.toLowerCase() === "skip") {
-          this.greenPokemon.mana += 30;
-          console.log(`skipping attack & increasing mana by 30`.green);
-        } else if (
-          !(
-            this.greenPokemon.skills[0].skillName.toLowerCase() ===
-              this.attackGreen.toLowerCase() ||
-            this.greenPokemon.skills[1].skillName.toLowerCase() ===
-              this.attackGreen.toLowerCase()
-          )
-        ) {
-          this.attackGreen = prompt("Green Player: Pick your attack: ".green);
-          attackCheckGreen();
-        } else {
-          console.log(colors.green(this.greenAttackTurn(this.attackGreen)));
-        }
-      }
-      attackCheckGreen();
-      console.log(
-        "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-          .red
-      );
-    }
-    console.log(
-      "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-        .red
-    );
-    console.log(colors.blue(this.showStatusBlue()));
-    console.log(colors.green(this.showStatusGreen()));
-    console.log(
-      "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-        .red
-    );
-    this.master();
-  }
-  master() {
-    if (this.bluePokemon.hitPoints <= 0) {
-      console.log(
-        colors.bold.bgGreen.black(
-          `${this.greenPokemon.pokemonName} has defeated ${this.bluePokemon.pokemonName} - Green Player Wins!`
-        )
-      );
-    } else if (this.greenPokemon.hitPoints <= 0) {
-      console.log(
-        colors.bold.bgBlue.black(
-          `${this.bluePokemon.pokemonName} has defeated ${this.greenPokemon.pokemonName} - Blue Player Wins!`
-        )
-      );
-    } else {
-      return this.fight();
-    }
-  }
-  startGame() {
-    console.log(
-      colors.yellow(
-        "Players, decide which pokemon you want:",
-        arena.displayPokemons()
-      )
-    );
-    console.log(
-      "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-        .red
-    );
-    let pickPokemonBlue = prompt("Blue Player: Pick your Pokemon: ".blue);
-    console.log(arena.pickPokemonBlue(pickPokemonBlue).blue);
-    console.log(
-      "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-        .red
-    );
-    let pickPokemonGreen = prompt("Green Player: Pick your Pokemon: ".green);
-    console.log(colors.green(arena.pickPokemonGreen(pickPokemonGreen)));
-    console.log(
-      "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-        .red
-    );
-    console.log(colors.blue(arena.showStatusBlue()));
-    console.log(colors.green(arena.showStatusGreen()));
-    console.log(
-      "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-        .red
-    );
-    arena.fight();
   }
 }
 
@@ -366,4 +231,228 @@ arena.addPokemon(
   mewTwo
 );
 
-arena.startGame();
+// main fight function, checking attack input functions & global variables
+
+let roundCounter = 0;
+let attackBlue = "";
+let attackGreen = "";
+
+function attackCheckBlue() {
+  let check = arena.bluePokemon.skills.find(
+    (pickedSkill) =>
+      pickedSkill.skillName.toLowerCase() === attackBlue.toLowerCase()
+  );
+  if (attackBlue.toLowerCase() === "skip") {
+    arena.bluePokemon.mana += 30;
+    console.log(`skipping attack & increasing mana by 30`.blue);
+  } else if (attackBlue.toLowerCase() === "check") {
+    console.log(arena.bluePokemon);
+    console.log(
+      "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+        .red
+    );
+    attackBlue = prompt("Blue Player: Pick your attack: ".blue);
+    attackCheckBlue();
+  } else if (
+    !(
+      arena.bluePokemon.skills[0].skillName.toLowerCase() ===
+        attackBlue.toLowerCase() ||
+      arena.bluePokemon.skills[1].skillName.toLowerCase() ===
+        attackBlue.toLowerCase()
+    )
+  ) {
+    attackBlue = prompt(
+      "Blue Player: Your Pokemon doesn't know that skill, pick your attack: "
+        .blue
+    );
+    attackCheckBlue();
+  } else if (arena.bluePokemon.mana < check.manaCost) {
+    attackBlue = prompt(
+      "Blue Player: Not enough Mana, pick another attack skill or skip to recover mana: "
+        .blue
+    );
+    attackCheckBlue();
+  } else {
+    console.log(colors.blue(arena.blueAttackTurn(attackBlue)));
+  }
+}
+
+function attackCheckGreen() {
+  let check = arena.greenPokemon.skills.find(
+    (pickedSkill) =>
+      pickedSkill.skillName.toLowerCase() === attackGreen.toLowerCase()
+  );
+  if (attackGreen.toLowerCase() === "skip") {
+    arena.greenPokemon.mana += 30;
+    console.log(`skipping attack & increasing mana by 30`.green);
+  } else if (attackGreen.toLowerCase() === "check") {
+    console.log(arena.greenPokemon);
+    console.log(
+      "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+        .red
+    );
+    attackGreen = prompt("Green Player: Pick your attack: ".green);
+    attackCheckGreen();
+  } else if (
+    !(
+      arena.greenPokemon.skills[0].skillName.toLowerCase() ===
+        attackGreen.toLowerCase() ||
+      arena.greenPokemon.skills[1].skillName.toLowerCase() ===
+        attackGreen.toLowerCase()
+    )
+  ) {
+    attackGreen = prompt(
+      "Green Player: Your Pokemon doesn't know that skill, pick your attack: "
+        .green
+    );
+    attackCheckGreen();
+  } else if (arena.greenPokemon.mana < check.manaCost) {
+    attackGreen = prompt(
+      "Green Player: Not enough Mana, pick your attack: ".green
+    );
+    attackCheckGreen();
+  } else {
+    console.log(colors.green(arena.greenAttackTurn(attackGreen)));
+  }
+}
+
+function fight() {
+  roundCounter += 1;
+  console.log(colors.yellow(`Round ${roundCounter} - FIGHT!`));
+  console.log(
+    "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+      .red
+  );
+
+  // Blue turn
+  attackBlue = prompt("Blue Player: Pick your attack: ".blue);
+  attackCheckBlue();
+  console.log(
+    "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+      .red
+  );
+  if (arena.greenPokemon.hitPoints <= 0 || arena.bluePokemon.hitPoints <= 0) {
+    master();
+  } else {
+    //Green Turn
+    attackGreen = prompt("Green Player: Pick your attack: ".green);
+    attackCheckGreen();
+    console.log(
+      "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+        .red
+    );
+  }
+  console.log(
+    "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+      .red
+  );
+  console.log(colors.blue(arena.showStatusBlue()));
+  console.log(colors.green(arena.showStatusGreen()));
+  console.log(
+    "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+      .red
+  );
+  master();
+}
+
+// Master function -- Check health until one pokemon dies - else return to fight()
+function master() {
+  if (arena.bluePokemon.hitPoints <= 0) {
+    console.log(
+      colors.bold.bgGreen.black(
+        `${arena.greenPokemon.pokemonName} has defeated ${arena.bluePokemon.pokemonName} - Green Player Wins!`
+      )
+    );
+  } else if (arena.greenPokemon.hitPoints <= 0) {
+    console.log(
+      colors.bold.bgBlue.black(
+        `${arena.bluePokemon.pokemonName} has defeated ${arena.greenPokemon.pokemonName} - Blue Player Wins!`
+      )
+    );
+  } else {
+    return fight();
+  }
+}
+
+//functions to check pokemon picks
+
+// blue
+function pokemonCheckBlue() {
+  let check = arena.pokemons.find(
+    (pickedPokemon) =>
+      pickedPokemon.pokemonName.toLowerCase() === pickPokemonBlue.toLowerCase()
+  );
+  if (check === undefined) {
+    pickPokemonBlue = prompt(
+      "Blue Player: Pokemon doesn't exist. Pick your Pokemon: ".blue
+    );
+    pokemonCheckBlue();
+  } else {
+    console.log(arena.pickPokemonBlue(pickPokemonBlue).blue);
+  }
+}
+// green
+function pokemonCheckGreen() {
+  let check = arena.pokemons.find(
+    (pickedPokemon) =>
+      pickedPokemon.pokemonName.toLowerCase() === pickPokemonGreen.toLowerCase()
+  );
+  if (check === undefined) {
+    pickPokemonGreen = prompt(
+      "Green Player: Pokemon doesn't exist. Pick your Pokemon: ".green
+    );
+    pokemonCheckGreen();
+  } else {
+    console.log(arena.pickPokemonGreen(pickPokemonGreen).green);
+  }
+}
+
+// game start sequence
+console.log(
+  colors.yellow(
+    "Players, decide which pokemon you want:",
+    arena.displayPokemons()
+  )
+);
+console.log(
+  "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+    .red
+);
+
+let pickPokemonBlue = prompt("Blue Player: Pick your Pokemon: ".blue);
+pokemonCheckBlue();
+console.log(
+  "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+    .red
+);
+let pickPokemonGreen = prompt("Green Player: Pick your Pokemon: ".green);
+pokemonCheckGreen();
+console.log(
+  "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+    .red
+);
+
+console.log(colors.blue(arena.showStatusBlue()));
+console.log(colors.green(arena.showStatusGreen()));
+console.log(
+  "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+    .red
+);
+console.log(
+  "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+    .red
+);
+fight();
+
+/*
+1. re-write into class methods (of arena class) 
+    i.   fight() 
+    ii.  master() 
+    iii. game sequence
+    iv.  minor functions related to above
+2. reduce number of functions (e.g functions that are specific to blue or green can be combined)
+3. add missing feature: damage increase when below 30% health
+4. make pokemon stats more levelled out
+5. improve readability in console (e.g when using "check" command, it should return a well formatted stat display)
+6. fix bug where "Blue Player Wins!" message is displayed twice
+*/

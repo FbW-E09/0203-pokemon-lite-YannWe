@@ -2,6 +2,24 @@ const prompt = require("prompt-sync")({ sigint: true });
 const colors = require("colors");
 
 /**
+ * 1. players pick pokemons
+ *    i. picked pokemons to be added to independent arrays
+ * 2. blue player always goes first to attack
+ * 3. attack sequence:
+ *    i. both Pokemon statuses are displayed and attacking player decides what to do:
+ *        a. picks attack & execute
+ *        b. skip attack to increase mana by 30 & skip to 4.
+ *    ii. impact on target:
+ *        a. attack – defense: if leftover attack <= 0, no hit
+ *        b. leftover attack > 0, HP of target – leftover attack
+ *        not implemented ---- c. if leftover HP is less than 40%, increase pokemon to level 2 (double damage in next turn)
+ *    iii. impact on attacker
+ *        a. reduce mana by cost of attack
+ *  4. next players turn
+ *  5. repeat sequence from 3. until either player's pokemon HP is <= 0, game over.
+ */
+
+/**
  * Pokemon constructor : create pokemons with
  *  –name
  *  –health
@@ -70,19 +88,20 @@ class Arena {
         pickedName.pokemonName.toLowerCase() === name.toLowerCase()
     );
     if (check === undefined) {
-      return
+      return;
     } else {
       this.bluePokemon = check;
       console.log(this.bluePokemon);
       return `${check.pokemonName} has entered the Arena`;
-    }}
+    }
+  }
   pickPokemonGreen(name) {
     let check = this.pokemons.find(
       (pickedName) =>
         pickedName.pokemonName.toLowerCase() === name.toLowerCase()
     );
     if (check === undefined) {
-      return
+      return;
     } else {
       this.greenPokemon = check;
       console.log(this.greenPokemon);
@@ -90,11 +109,13 @@ class Arena {
     }
   }
   showStatusBlue() {
-    return `${this.bluePokemon.pokemonName} has ${this.bluePokemon.hitPoints} hit points, ${this.bluePokemon.mana} mana points left`} 
-    // and currently has a damage multiplier of ${this.bluePokemon.level}x`;
+    return `${this.bluePokemon.pokemonName} has ${this.bluePokemon.hitPoints} hit points, ${this.bluePokemon.mana} mana points left`;
+  }
+  // and currently has a damage multiplier of ${this.bluePokemon.level}x`;
   showStatusGreen() {
-    return `${this.greenPokemon.pokemonName} has ${this.greenPokemon.hitPoints} hit points, ${this.greenPokemon.mana} mana points left`} 
-/*     and currently has a damage multiplier of ${this.greenPokemon.level}x`;
+    return `${this.greenPokemon.pokemonName} has ${this.greenPokemon.hitPoints} hit points, ${this.greenPokemon.mana} mana points left`;
+  }
+  /*     and currently has a damage multiplier of ${this.greenPokemon.level}x`;
   } */
   blueAttackTurn(skill) {
     let check = this.bluePokemon.skills.find(
@@ -269,7 +290,6 @@ function fight() {
   if (arena.greenPokemon.hitPoints <= 0 || arena.bluePokemon.hitPoints <= 0) {
     master();
   } else {
-
     //Green Turn
     attackGreen = prompt("Green Player: Pick your attack: ".green);
     function attackCheckGreen() {
@@ -337,100 +357,68 @@ function master() {
     return fight();
   }
 }
-/**
- * 1. players pick pokemons
- *    i. picked pokemons to be added to independent arrays
- * 2. blue player always goes first to attack
- * 3. attack sequence:
- *    i. both Pokemon statuses are displayed and attacking player decides what to do:
- *        a. picks attack & execute
- *        b. skip attack to increase mana by 30 & skip to 4.
- *    ii. impact on target:
- *        a. attack – defense: if leftover attack <= 0, no hit
- *        b. leftover attack > 0, HP of target – leftover attack
- *        c. if leftover HP is less than 40%, increase pokemon to level 2 (double damage in next turn)
- *    iii. impact on attacker
- *        a. reduce mana by cost of attack
- *        b. increase mana by 10
- *  4. next players turn
- *  5. repeat sequence from 3. until either player's pokemon HP is <= 0, game over.
- */
 
 //game sequence
-
-
-  console.log(
-    colors.yellow(
-      "Players, decide which pokemon you want:",
-      arena.displayPokemons()
-    )
-  );
-  console.log(
-    "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-      .red
-  );
-
-  let pickPokemonBlue = prompt("Blue Player: Pick your Pokemon: ".blue);
-  function pokemonCheckBlue() {
-    let check = arena.pokemons.find(
-      (pickedPokemon) =>
-        pickedPokemon.pokemonName.toLowerCase() === pickPokemonBlue.toLowerCase()
-    );
-    if (check === undefined) {
-      pickPokemonBlue = prompt("Blue Player: Pokemon doesn't exist. Pick your Pokemon: ".blue);
-      pokemonCheckBlue()
-    } else {console.log(arena.pickPokemonBlue(pickPokemonBlue).blue);}
-  }
-  pokemonCheckBlue()
-  console.log(
-    "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-      .red
-  );
-  let pickPokemonGreen = prompt("Green Player: Pick your Pokemon: ".green);
-  function pokemonCheckGreen() {
-    let check = arena.pokemons.find(
-      (pickedPokemon) =>
-        pickedPokemon.pokemonName.toLowerCase() === pickPokemonGreen.toLowerCase()
-    );
-    if (check === undefined) {
-      pickPokemonGreen = prompt("Green Player: Pokemon doesn't exist. Pick your Pokemon: ".green);
-      pokemonCheckGreen()
-    } else {console.log(arena.pickPokemonGreen(pickPokemonGreen).green);}
-  }
-  pokemonCheckGreen()
-  console.log(
-    "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-      .red
-  );
-
-  console.log(colors.blue(arena.showStatusBlue()));
-  console.log(colors.green(arena.showStatusGreen()));
-  console.log(
-    "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-      .red
-  );
-  console.log(
-    "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
-      .red
-  );
-  fight();
-
-
-/* while (arena.bluePokemon.hitPoints > 0 || arena.greenPokemon.hitPoints > 0) {
-  return;
-} */
-
-/* let attackBlue = prompt("Blue Player: Pick your attack: ".blue);
-console.log(colors.blue(arena.blueAttackTurn(attackBlue)));
+console.log(
+  colors.yellow(
+    "Players, decide which pokemon you want:",
+    arena.displayPokemons()
+  )
+);
 console.log(
   "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
     .red
 );
-let attackGreen = prompt("Green Player: Pick your attack: ".green);
-console.log(colors.green(arena.greenAttackTurn(attackGreen)));
+
+let pickPokemonBlue = prompt("Blue Player: Pick your Pokemon: ".blue);
+function pokemonCheckBlue() {
+  let check = arena.pokemons.find(
+    (pickedPokemon) =>
+      pickedPokemon.pokemonName.toLowerCase() === pickPokemonBlue.toLowerCase()
+  );
+  if (check === undefined) {
+    pickPokemonBlue = prompt(
+      "Blue Player: Pokemon doesn't exist. Pick your Pokemon: ".blue
+    );
+    pokemonCheckBlue();
+  } else {
+    console.log(arena.pickPokemonBlue(pickPokemonBlue).blue);
+  }
+}
+pokemonCheckBlue();
+console.log(
+  "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+    .red
+);
+let pickPokemonGreen = prompt("Green Player: Pick your Pokemon: ".green);
+function pokemonCheckGreen() {
+  let check = arena.pokemons.find(
+    (pickedPokemon) =>
+      pickedPokemon.pokemonName.toLowerCase() === pickPokemonGreen.toLowerCase()
+  );
+  if (check === undefined) {
+    pickPokemonGreen = prompt(
+      "Green Player: Pokemon doesn't exist. Pick your Pokemon: ".green
+    );
+    pokemonCheckGreen();
+  } else {
+    console.log(arena.pickPokemonGreen(pickPokemonGreen).green);
+  }
+}
+pokemonCheckGreen();
+console.log(
+  "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+    .red
+);
+
 console.log(colors.blue(arena.showStatusBlue()));
 console.log(colors.green(arena.showStatusGreen()));
 console.log(
   "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
     .red
-); */
+);
+console.log(
+  "–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
+    .red
+);
+fight();
