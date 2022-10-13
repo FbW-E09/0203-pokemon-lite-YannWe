@@ -4,7 +4,7 @@ This was a project for the DCI JavaScript fundamentals module. I expanded upon t
 
 Game is made with vanilla JS, runs in the terminal and is meant for 2 players.
 
-<img src="./pokemon-terminal-game.gif" width="450"/>
+<img src="./pokemon-terminal-game.gif" width="720"/>
 
 ## How-to:
 
